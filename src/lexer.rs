@@ -1,3 +1,4 @@
+use once_cell::sync::Lazy;
 use regex::Regex;
 
 #[derive(Debug, PartialEq)]
@@ -6,49 +7,78 @@ pub enum Token {
     Identifier(String),
     Integer(i32),
     Float(f64),
-    StringLiteral(String), // New variant for strings
+    StringLiteral(String),
     Operator(String),
     Parenthesis(char),
     Semicolon,
+    Colon,
+    Comma,
+    CurlyBracketOpen,
+    CurlyBracketClose,
+    Func,
+    Return,
 }
 
-pub fn lex(source_code: &str) -> Vec<Token> {
-    let token_regex = Regex::new(r#"\b(let)\b|\b([a-zA-Z_][a-zA-Z0-9_]*)\b|\b(\d+\.\d+|\d+)\b|("[^"]*")|[+\-*/();=]"#).unwrap();
-    let mut tokens = Vec::new();
+static TOKEN_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(
+        r#"(?x)
+        \b(let|func|return)\b
+        |\b([a-zA-Z_][a-zA-Z0-9_]*)\b
+        |\b(\d+\.\d+|\d+)\b
+        |("[^"\\]*")
+        |[-+*/();=]|->|:|,|\{|}
+    "#,
+    )
+    .unwrap()
+});
 
-    for captures in token_regex.captures_iter(source_code) {
-        if let Some(capture) = captures.get(1) {
-            let token = capture.as_str();
-            let token_type = match token {
+pub fn lex(source_code: &str) -> Vec<Token> {
+    TOKEN_REGEX
+        .find_iter(source_code)
+        .map(|mat| {
+            let token = mat.as_str();
+            match token {
                 "let" => Token::Let,
-                _ => unreachable!(),
-            };
-            tokens.push(token_type);
-        } else if let Some(capture) = captures.get(2) {
-            let token = capture.as_str();
-            tokens.push(Token::Identifier(token.to_string()));
-        } else if let Some(capture) = captures.get(3) {
-            let token = capture.as_str();
-            let token_type = if token.contains('.') {
-                Token::Float(token.parse().unwrap())
-            } else {
-                Token::Integer(token.parse().unwrap())
-            };
-            tokens.push(token_type);
-        } else if let Some(capture) = captures.get(4) {
-            let token = capture.as_str();
-            let token_type = Token::StringLiteral(token[1..token.len() - 1].to_string()); // Remove surrounding quotes
-            tokens.push(token_type);
-        } else {
-            let token = captures.get(0).unwrap().as_str();
-            let token_type = match token {
+                "func" => Token::Func,
+                "return" => Token::Return,
                 ";" => Token::Semicolon,
-                "=" => Token::Operator(token.to_string()),
-                _ => Token::Operator(token.to_string()),
-            };
-            tokens.push(token_type);
-        }
+                "=" | "+" | "*" | "-" | "/" | "<<" | ">>" => Token::Operator(token.to_string()),
+                ":" => Token::Colon,
+                "," => Token::Comma,
+                "{" => Token::CurlyBracketOpen,
+                "}" => Token::CurlyBracketClose,
+                "(" => Token::Parenthesis('('),
+                ")" => Token::Parenthesis(')'),
+                _ => {
+                    if let Some(number_token) = parse_number(token) {
+                        number_token
+                    } else if token.starts_with('"') && token.ends_with('"') {
+                        Token::StringLiteral(token[1..token.len() - 1].to_string())
+                    } else {
+                        Token::Identifier(token.to_string())
+                    }
+                }
+            }
+        })
+        .collect()
+}
+
+/// Parse a number
+///
+/// # Arguments
+///
+/// * `token`: string representing a number
+///
+/// returns: Option<Token>
+///
+fn parse_number(token: &str) -> Option<Token> {
+    if let Ok(int_value) = token.parse::<i32>() {
+        return Some(Token::Integer(int_value));
     }
 
-    tokens
+    if let Ok(float_value) = token.parse::<f64>() {
+        return Some(Token::Float(float_value));
+    }
+
+    None
 }

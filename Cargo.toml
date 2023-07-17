@@ -1,0 +1,10 @@
+[package]
+name = "klang"
+autotests = true
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+once_cell = "1.17.2"
+regex = "1.8.3"
