@@ -1,6 +1,8 @@
 use std::process;
+use std::io::Write;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
+#[derive(Debug)]
 pub enum LexError {
     InvalidEscapeSequence(char, String),
     UnexpectedBackslash(String),

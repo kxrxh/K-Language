@@ -1,4 +1,5 @@
-use crate::lexer::lexer::{lex, print_error_with_line};
+use crate::lexer::lex_error::print_error_with_line;
+use crate::lexer::lexer::lex;
 
 mod lexer;
 

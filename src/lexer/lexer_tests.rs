@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::lexer::{lex, Token};
+    use crate::lexer::lexer::{lex, Token};
 
     #[test]
     fn test_lex_integer() {
@@ -12,7 +12,7 @@ mod tests {
             Token::Integer(123),
             Token::Semicolon,
         ];
-        assert_eq!(lex(source_code), expected_tokens);
+        assert_eq!(lex(source_code).unwrap(), expected_tokens);
     }
 
     #[test]
@@ -25,7 +25,7 @@ mod tests {
             Token::Float(3.14),
             Token::Semicolon,
         ];
-        assert_eq!(lex(source_code), expected_tokens);
+        assert_eq!(lex(source_code).unwrap(), expected_tokens);
     }
 
     #[test]
@@ -38,7 +38,7 @@ mod tests {
             Token::StringLiteral("hello".to_string()),
             Token::Semicolon,
         ];
-        assert_eq!(lex(source_code), expected_tokens);
+        assert_eq!(lex(source_code).unwrap(), expected_tokens);
     }
 
     #[test]
@@ -87,7 +87,7 @@ mod tests {
             Token::CurlyBracketClose,
         ];
 
-        assert_eq!(lex(source_code), expected_tokens);
+        assert_eq!(lex(source_code).unwrap(), expected_tokens);
     }
     #[test]
     fn test_lex_operators() {
@@ -107,7 +107,7 @@ mod tests {
             Token::Integer(2),
             Token::Semicolon,
         ];
-        assert_eq!(lex(source_code), expected_tokens);
+        assert_eq!(lex(source_code).unwrap(), expected_tokens);
     }
 
     #[test]
@@ -125,7 +125,7 @@ mod tests {
             Token::Parenthesis(')'.to_string().parse().unwrap()),
             Token::Semicolon,
         ];
-        assert_eq!(lex(source_code), expected_tokens);
+        assert_eq!(lex(source_code).unwrap(), expected_tokens);
     }
 
     #[test]
@@ -138,7 +138,7 @@ mod tests {
             Token::StringLiteral(r"Hello + World!".to_string()),
             Token::Semicolon,
         ];
-        assert_eq!(lex(source_code), expected_tokens);
+        assert_eq!(lex(source_code).unwrap(), expected_tokens);
     }
     #[test]
     fn test_let_string_with_special_symb() {
@@ -150,7 +150,7 @@ mod tests {
             Token::StringLiteral("\'".to_string()),
             Token::Semicolon,
         ];
-        assert_eq!(lex(source_code), expected);
+        assert_eq!(lex(source_code).unwrap(), expected);
     }
 
     #[test]
@@ -163,6 +163,6 @@ mod tests {
             Token::StringLiteral("\\".to_string()),
             Token::Semicolon,
         ];
-        assert_eq!(lex(source_code), expected);
+        assert_eq!(lex(source_code).unwrap(), expected);
     }
 }
