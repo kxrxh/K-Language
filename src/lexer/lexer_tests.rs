@@ -127,4 +127,42 @@ mod tests {
         ];
         assert_eq!(lex(source_code), expected_tokens);
     }
+
+    #[test]
+    fn test_lex_string_with_symbols() {
+        let source_code = r#"let message = "Hello + World!";"#;
+        let expected_tokens = vec![
+            Token::Let,
+            Token::Identifier("message".to_string()),
+            Token::Operator("=".to_string()),
+            Token::StringLiteral(r"Hello + World!".to_string()),
+            Token::Semicolon,
+        ];
+        assert_eq!(lex(source_code), expected_tokens);
+    }
+    #[test]
+    fn test_let_string_with_special_symb() {
+        let source_code = r#"let x = "\'";"#;
+        let expected = vec![
+            Token::Let,
+            Token::Identifier("x".to_string()),
+            Token::Operator("=".to_string()),
+            Token::StringLiteral("\'".to_string()),
+            Token::Semicolon,
+        ];
+        assert_eq!(lex(source_code), expected);
+    }
+
+    #[test]
+    fn test_let_string_with_special_symb2() {
+        let source_code = r#"let x = "\\";"#;
+        let expected = vec![
+            Token::Let,
+            Token::Identifier("x".to_string()),
+            Token::Operator("=".to_string()),
+            Token::StringLiteral("\\".to_string()),
+            Token::Semicolon,
+        ];
+        assert_eq!(lex(source_code), expected);
+    }
 }
