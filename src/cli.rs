@@ -24,6 +24,7 @@ impl Args {
 #[derive(Subcommand, Debug)]
 pub(crate) enum Command {
     Run(RunArgs),
+    Compile(CompileArgs),
     Check,
     Test,
     Version,
@@ -54,6 +55,12 @@ impl Command {
 
 #[derive(Debug, Parser)]
 pub struct RunArgs {
+    #[arg(help = "Input klang source code file")]
+    file: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct CompileArgs {
     #[arg(help = "Input klang source code file")]
     file: String,
 }

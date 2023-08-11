@@ -1,56 +1,76 @@
-// grammar.pest
-
 // Define token rules
 WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
 
 IDENTIFIER = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 EQUALS     =  { "=" }
-DIGIT      =  { '0'..'9' }
-boolean    =  { "true" | "false" }
+BOOLEAN    =  { "true" | "false" }
 SEMICOLON  =  { ";" }
-NUMBER     = @{ int ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ int)? }
-int        =  { ("+" | "-")? ~ ASCII_DIGIT+ }
+NUMBER     = @{ INT ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ INT)? }
+INT        =  { ("+" | "-")? ~ ASCII_DIGIT+ }
 STRING     =  { "\"" ~ (!"\"" ~ ANY)+ ~ "\"" }
 
-OPERATION  = { ADD | SUB | MUL | DIV | MOD | POW | SHIFTL | SHIFTR | EQ }
-ADD        = { "+" }
-SUB        = { "-" }
-MUL        = { "*" }
-DIV        = { "/" }
-EQ         = { "==" }
-POW        = { "^" }
-SHIFTL     = { "<<" }
-SHIFTR     = { ">>" }
-MOD        = { "%" }
+// Define token rules for operations
+OPERATOR = { ADD | SUB | MUL | DIV | MOD | POW | SHIFTL | SHIFTR | EQ | AND | OR }
+ADD      = { "+" }
+SUB      = { "-" }
+MUL      = { "*" }
+DIV      = { "/" }
+EQ       = { "==" }
+POW      = { "^" }
+SHIFTL   = { "<<" }
+SHIFTR   = { ">>" }
+MOD      = { "%" }
+AND      = { "&&" }
+OR       = { "||" }
+
+ASSIGN_OPERATOR = { IDENTIFIER ~ (ADDEQ | SUBEQ | MULEQ | DIVEQ | MODEQ | SHIFTLEQ | SHIFTREQ | POWEQ | SHIFTL | SHIFTR) ~ TERM ~ SEMICOLON }
+ADDEQ           = { "+=" }
+SUBEQ           = { "-=" }
+MULEQ           = { "*=" }
+DIVEQ           = { "/=" }
+MODEQ           = { "%=" }
+POWEQ           = { "^=" }
+SHIFTLEQ        = { "<<=" }
+SHIFTREQ        = { ">>=" }
+
+// Define basic lang types
+TYPE       = { INT_TYPE | FLOAT_TYPE | BOOL_TYPE }
 INT_TYPE   = { "int" }
 FLOAT_TYPE = { "float" }
 BOOL_TYPE  = { "bool" }
 
-TYPE = { INT_TYPE | FLOAT_TYPE | BOOL_TYPE }
-
 // Define main grammar rules
 program = { SOI ~ STATEMENT* ~ EOI }
 
-STATEMENT = { VAR_DECLARATION ~ SEMICOLON | IF | FUNCTION_DECLARATION | RETURN }
-
-TERM = _{
-    IDENTIFIER
+STATEMENT  =  { VAR_DECLARATION ~ SEMICOLON | IF | FOR | WHILE | FUNCTION_DECLARATION | RETURN | ASSIGN_OPERATOR | FUNCTION_CALL ~ SEMICOLON }
+TERM       = _{
+    FUNCTION_CALL
+  | IDENTIFIER
   | STRING
   | NUMBER
+  | BOOLEAN
   | "(" ~ TERM ~ ")"
   | "(" ~ EXPRESSION ~ ")"
 }
-
-EXPRESSION = { (TERM ~ (OPERATION ~ TERM)*) | TERM }
+EXPRESSION =  { (TERM ~ (OPERATOR ~ TERM)*) | TERM }
 
 VAR_DECLARATION = { "let " ~ IDENTIFIER ~ EQUALS ~ EXPRESSION }
 
-// New rule for if-else branches
+// Define rule for if-else branches
 IF   = { "if" ~ EXPRESSION ~ "{" ~ STATEMENT* ~ "}" ~ ELSE? }
 ELSE = { "else" ~ "{" ~ STATEMENT* ~ "}" }
 
-// New rules for function declarations
-FUNCTION_DECLARATION = { "func " ~ IDENTIFIER ~ "(" ~ (IDENTIFIER ~ ("," ~ IDENTIFIER)*)? ~ ")" ~ ("->" ~ TYPE)? ~ FUNCTION_BODY }
-FUNCTION_BODY        = { ("{" ~ STATEMENT* ~ "}") | (STATEMENT) }
+// Define rule for for and while loops
+RANGE = { (INT ~ ".." ~ EQUALS? ~ INT) | (".." ~ EQUALS? ~ INT) }
+FOR   = { "for" ~ IDENTIFIER ~ "in" ~ RANGE ~ BLOCK }
+WHILE = { "while" ~ EXPRESSION ~ "{" ~ STATEMENT* ~ "}" }
 
-RETURN = { "return" ~ EXPRESSION? ~ SEMICOLON }
+// Define rule for function declarations
+FUNCTION_DECLARATION     = { "fn " ~ IDENTIFIER ~ "(" ~ FUNCTION_DECLARATION_ARG ~ ")" ~ ("->" ~ TYPE)? ~ (BLOCK | (RETURN)) }
+RETURN                   = { "return" ~ EXPRESSION? ~ SEMICOLON }
+FUNCTION_CALL            = { IDENTIFIER ~ "(" ~ FUNCTION_ARG ~ ")" }
+FUNCTION_DECLARATION_ARG = { (IDENTIFIER ~ ("," ~ IDENTIFIER)*)? }
+FUNCTION_ARG             = { ((EXPRESSION | TERM) ~ ("," ~ (EXPRESSION | TERM))*)? }
+
+// Define rule for block
+BLOCK = { "{" ~ STATEMENT* ~ "}" }
