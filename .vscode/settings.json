@@ -3,4 +3,5 @@
         "./Cargo.toml"
     ],
     "rust-analyzer.cargo.autoreload": true,
+    "rust-analyzer.showUnlinkedFileNotification": false,
 }

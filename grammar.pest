@@ -34,10 +34,11 @@ SHIFTLEQ        = { "<<=" }
 SHIFTREQ        = { ">>=" }
 
 // Define basic lang types
-TYPE       = { INT_TYPE | FLOAT_TYPE | BOOL_TYPE }
+TYPE       = { INT_TYPE | FLOAT_TYPE | BOOL_TYPE | VOID_TYPE }
 INT_TYPE   = { "int" }
 FLOAT_TYPE = { "float" }
 BOOL_TYPE  = { "bool" }
+VOID_TYPE  = { "void" }
 
 // Define main grammar rules
 program = { SOI ~ STATEMENT* ~ EOI }
@@ -65,12 +66,13 @@ RANGE = { (INT ~ ".." ~ EQUALS? ~ INT) | (".." ~ EQUALS? ~ INT) }
 FOR   = { "for" ~ IDENTIFIER ~ "in" ~ RANGE ~ BLOCK }
 WHILE = { "while" ~ EXPRESSION ~ "{" ~ STATEMENT* ~ "}" }
 
-// Define rule for function declarations
-FUNCTION_DECLARATION     = { "fn " ~ IDENTIFIER ~ "(" ~ FUNCTION_DECLARATION_ARG ~ ")" ~ ("->" ~ TYPE)? ~ (BLOCK | (RETURN)) }
-RETURN                   = { "return" ~ EXPRESSION? ~ SEMICOLON }
-FUNCTION_CALL            = { IDENTIFIER ~ "(" ~ FUNCTION_ARG ~ ")" }
-FUNCTION_DECLARATION_ARG = { (IDENTIFIER ~ ("," ~ IDENTIFIER)*)? }
-FUNCTION_ARG             = { ((EXPRESSION | TERM) ~ ("," ~ (EXPRESSION | TERM))*)? }
+// Define rule for function declarationFUNCTION_ARGs
+FUNCTION_DECLARATION            = { "fn " ~ IDENTIFIER ~ "(" ~ FUNCTION_DECLARATION_ARGS_BLOCK ~ ")" ~ ("->" ~ TYPE)? ~ (BLOCK | (RETURN)) }
+RETURN                          = { "return" ~ EXPRESSION? ~ SEMICOLON }
+FUNCTION_CALL                   = { IDENTIFIER ~ "(" ~ FUNCTION_CALL_ARG ~ ")" }
+FUNCTION_DECLARATION_ARGS_BLOCK = { (FUNCTION_DECLARATION_ARG ~ ("," ~ FUNCTION_DECLARATION_ARG)*)? }
+FUNCTION_DECLARATION_ARG        = { (TYPE ~ IDENTIFIER) }
+FUNCTION_CALL_ARG               = { ((EXPRESSION | TERM) ~ ("," ~ (EXPRESSION | TERM))*)? }
 
 // Define rule for block
 BLOCK = { "{" ~ STATEMENT* ~ "}" }

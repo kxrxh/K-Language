@@ -49,6 +49,7 @@ impl Command {
                     version = env!("CARGO_PKG_VERSION")
                 );
             }
+            Command::Compile(_) => todo!(),
         }
     }
 }
